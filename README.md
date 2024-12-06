@@ -1,4 +1,4 @@
-# Capstone Project Clone - Social Media App
+# Capstone Project Clone - Movie Social Media App
 This repository is a clone of the Movie Social Media App that I created with my teammates during our Capstone class.
 
 # Security

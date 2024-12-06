@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% if movie %}
+    {% block title %}{{ movie.title }}{% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h1 class="text-white mt-2 me-2 text-center">
+            {{ movie.title }} ({{ movie.release_date|date:"Y" }})
+        </h1>
+        <h5 class="text-white text-center mb-2">Rated: {{ movie.rated }}</h5>
+        <h4 class="text-center mb-4">Directed by: {{ movie.director }}</h4>
+    
+        <div class="row justify-content-md-center">
+            <div class="col-md-5 d-flex flex-column align-items-center" style="padding-top: 25px;">
+                <div class="d-flex justify-content-between align-items-center w-100 mb-3" style="gap: 10px;">
+                    {% if is_favorited %}
+                        <form method="POST" action="{% url 'remove_from_favorites' movie.tmdb_id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="background-color:#16A085; color:white; min-width: 120px;">Unfavorite</button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{% url 'add_to_favorites' movie.tmdb_id %}" class="me-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="background-color:#16A085; color:white; min-width: 120px;">Favorite</button>
+                        </form>
+                    {% endif %}
+
+                    <form method="POST" action="{% url 'movie_details' movie.tmdb_id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="movie" value="{{ movie }}">
+                        <button type="submit" name="trigger_movie" class="btn" style="background-color:#c0392b; color:white; display: inline-flex; align-items: center; padding: 5px 15px; font-size: 16px;">
+                            <span>Trigger</span><span style="margin-left: 5px;">Warning</span>
+                        </button>  
+                    </form>
+                  
+                    <form method="post" action="{% url 'movie_details' movie.tmdb_id %}" id="directorOpinion">
+                        {% csrf_token %}
+                        <input type="hidden" name="movie" value="{{ movie.title }}">
+                        <input type="hidden" name="director" id="directorName">
+                        
+                        {% if directors %}
+                        <div class="btn-group">
+                            <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" style="color: aliceblue; min-width: 120px;">
+                                Director's Opinion
+                            </button>
+                            <ul class="dropdown-menu">
+                                {% for director in directors %}
+                                <li><a class="dropdown-item" href="#" onclick="setDirector('{{director.name}}')">{{director.name}}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+                
+                <img src="{{ movie.poster }}" class="img-fluid rounded mb-3">
+            </div>
+
+            <div class="col-md-7 d-flex align-items-start flex-column" style="padding-top: 20px;">
+                <div style="margin-top: 20px;">
+                    <h2 class="text-underline" style="color:#16A085;"><u>Plot</u></h2>
+                    <p class="text-white">{{ movie.plot }}</p>
+                    <h2 class="text-underline" style="color:#16A085;"><u>Cast</u></h2>
+                    <p class="text-white">{{ movie.cast }}</p>
+                    <h2 class="text-underline" style="color:#16A085;"><u>Genre</u></h2>
+                    <p class="text-white">{{ movie.genre }}</p>
+                    <div class="embed-responsive embed-responsive-16by9 mb-3">
+                        <iframe class="embed-responsive-item" 
+                                src="https://www.youtube.com/embed/{{ movie.trailer }}" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Streaming Sources Section -->
+    {% if streaming_sources %}
+        <div class="container mt-4">
+            <h3 class="text-white">Available Streaming Sources</h3>
+            <ul class="list-unstyled">
+                {% for source in streaming_sources %}
+                    <li class="text-white">
+                        <a href="{{ source.web_url }}" target="_blank" class="btn btn-link" style="color: #16A085;">{{ source.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="container mt-4">
+            <h3 class="text-white">No Streaming Sources</h3>
+        </div>
+    {% endif %}
+
+    <div class="modal fade" id="triggerModal" tabindex="-1" aria-labelledby="triggerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 800px;"> 
+            <div class="modal-content" style="border-radius: 5px; background-color: #2C2C2C; border-color: #16A085;">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white" id="triggerModalLabel">Offensive Content found in {{movie.title}}</h5>
+                </div>
+                <div class="modal-body text-white">
+                    {% if trigger_description %}
+                        <div class="row">
+                            <div class="col-md-5 d-flex flex-column align-items-center">
+                                <img src="{{ movie.poster }}" class="img-fluid" style="border-radius: 5px; max-width: 100%;">
+                            </div>
+                            <div class="col-md-7 d-flex flex-column align-items-start">
+                                <p>{{ trigger_description|linebreaks }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>No Response.</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="opinionModal" tabindex="-1" aria-labelledby="opinionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 800px;"> 
+            <div class="modal-content" style="border-radius: 5px; background-color: #2C2C2C; border-color: #16A085;">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white" id="opinionModalLabel">{{selected_director.name}}'s Opinion on {{movie.title}}</h5>
+                </div>
+                <div class="modal-body text-white">
+                    {% if opinion %}
+                        <div class="row">
+                            <div class="col-md-5 d-flex flex-column align-items-center">
+                                <img src="{{ selected_director.profile }}" class="img-fluid" style="border-radius: 5px; max-width: 100%;">
+                            </div>
+                            <div class="col-md-7 d-flex flex-column align-items-start">
+                                <p>{{ opinion }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>No opinion available.</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setDirector(director) {
+            document.getElementById("directorName").value = director;
+            document.getElementById("directorOpinion").submit();
+        }
+
+        function showOpinion() {
+            var opinionModal = new bootstrap.Modal(document.getElementById("opinionModal"));
+            opinionModal.show();
+        }
+    </script>
+
+    {% if opinion %}
+        <script>
+            var modal = new bootstrap.Modal(document.getElementById("opinionModal"));
+            modal.show();
+        </script>
+    {% endif %}
+
+    {% if trigger_description %}
+        <script>
+            var modal = new bootstrap.Modal(document.getElementById("triggerModal"));
+            modal.show();
+        </script>
+    {% endif %}
+
+    {% endblock %}
+{% endif %}

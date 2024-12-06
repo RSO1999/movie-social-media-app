@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Select Favorite Movies{% endblock %}
+{% block content %}
+{% if request.user.is_authenticated %}
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center g-3">
+            {% for movie in recommended_movies %}
+                <div class="col-md-3 d-flex align-items-stretch">
+                    <div class="card" style="width: 20rem; margin: 10px; border-color: #16A085;">
+                        <a href="{% url 'movie_details' movie.tmdb_id %}">
+                            <img src="{{ movie.poster }}" class="card-img-top" style="width: 100%; height: auto; object-fit: cover;">
+                        </a>
+                        <div class="card-header" style="background-color: #000000; color: #E0E0E0; font-weight: bold; height: 50px; display: flex; align-items: center;">
+                            {{ movie.title }} ({{ movie.release_date|date:"Y" }})
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="send">SEND</button>
+            <button type="submit" name="cancel">CANCEL</button>
+        </form>
+    </div>
+
+{% else %}
+    <p>You must be logged in to recommend someone a movie!</p>
+{% endif %}
+{% endblock %}

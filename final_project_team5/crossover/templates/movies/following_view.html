@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center text-white">{{ user_profile.username }}'s Following</h1>
+    <div class="following-box border rounded p-3 mt-4">
+        <ul class="list-group">
+            {% for followed in following %}
+                <li class="list-group-item bg-dark text-white text-center">
+                    <a href="{% url 'profile_view' followed.following.id %}" class="text-white">{{ followed.following.username }}</a>
+                    {% if is_own_profile %}
+                    <!-- UNFOLLOW FEATURE -->
+                        <form method="POST" action="{% url 'unfollow_user' followed.following.id %}" class="d-inline-block">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm ml-2">Unfollow</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item bg-dark text-white text-center">Not following anyone yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

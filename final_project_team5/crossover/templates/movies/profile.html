@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center text-white">{{ user_profile.username }}'s Profile</h1>
+
+    <div class="text-center mb-4">
+        {% if user_profile.id == request.user.id %}
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+        {% else %}
+            <a href="{% url 'movie_picker' user_profile.id %}" class="btn btn-primary">Recommend Movies</a>
+        {% endif %}
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <h2 class="text-info text-center">
+                <a href="{% url 'followers_view' user_profile.id %}" class="text-info">Followers ({{ followers_count }})</a>
+            </h2>
+        </div>
+        <div class="col-md-5 mb-4">
+            <h2 class="text-info text-center">
+                <a href="{% url 'following_view' user_profile.id %}" class="text-info">Following ({{ following_count }})</a>
+            </h2>
+        </div>
+    </div>
+
+    <div class="favorites-section text-center">
+        <h2 class="text-white">
+            {% if user_profile.id == request.user.id %}
+                Your Favorite Movies
+            {% else %}
+                {{ user_profile.username }}'s Favorite Movies
+            {% endif %}
+        </h2>
+
+        <div class="favorites-container d-flex flex-wrap justify-content-center mt-3">
+            {% if favorites %}
+                {% for favorite in favorites %}
+                    <div class="movie-poster-container">
+                        <a href="{% url 'movie_details' favorite.movie.tmdb_id %}">
+                            <img src="{{ favorite.movie.poster }}" alt="{{ favorite.movie.title }} poster" class="movie-poster">
+                            <div class="movie-title">{{ favorite.movie.title }} ({{ favorite.movie.release_date|date:"Y" }})</div>
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-light mt-3">You have no favorite movies yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --bg-color: #1A1A1A;
+        --text-color: #E0E0E0;
+        --header-bg-color: #007A6C;
+        --button-color: #FF0000;
+        --card-bg-color: #2A2A2A;
+        --card-border-radius: 8px;
+        --hover-color: #009987;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1, h2 {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        margin: 20px 0;
+    }
+
+    .btn-primary {
+        background-color: var(--header-bg-color);
+        border: none;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--hover-color);
+    }
+
+    .favorites-section h2 {
+        font-size: 1.75rem;
+    }
+
+    .favorites-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .movie-poster-container {
+        width: 150px;
+        text-align: center;
+        margin: 10px;
+    }
+
+    .movie-poster {
+        width: 100%;
+        border-radius: var(--card-border-radius);
+        transition: transform 0.2s ease;
+    }
+
+    .movie-poster:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .movie-title {
+        font-size: 1rem;
+        color: var(--text-color);
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}

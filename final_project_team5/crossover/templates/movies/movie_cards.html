@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Movies{% endblock %}
+
+{% block content %}
+<h1 style="text-align: center; color: white; margin-top: 10px;">
+    {% if query %}
+        Search Results for "{{ query }}"
+    {% else %}
+        Browse Movies
+    {% endif %}
+</h1>
+
+{% if not tmdb_results %}
+    {% if movies %}
+        {% if not query %}
+        <form class="row align-items-center justify-content-center" action="{% url 'movie_cards' %}" method="get">
+            <div class="col-auto">
+                <div class="dropdown">
+                    <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Genre
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for genre in genres %}
+                        <li>
+                            <label class="dropdown-item">
+                                <input type="checkbox" name="genre" value="{{ genre }}"
+                                    {% if genre in selected_genres %}checked{% endif %}>
+                                {{ genre }}
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="dropdown">
+                    <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Decade
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for decade in decades %}
+                        <li>
+                            <label class="dropdown-item">
+                                <input type="checkbox" name="decade" value="{{ decade }}"
+                                    {% if decade in selected_decades %}checked{% endif %}>
+                                {{ decade }}
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-auto">
+                <div class="dropdown">
+                    <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Rating
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for rating in ratings %}
+                        <li>
+                            <label class="dropdown-item">
+                                <input type="checkbox" name="rating" value="{{ rating }}"
+                                    {% if rating in selected_ratings %}checked{% endif %}>
+                                {{ rating }}
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <button type="submit" class="btn" style="background-color: #007A6C;">Filter</button>
+        </form>
+        {% endif %}
+        {% if query %}
+        <div style="text-align: center; margin-bottom: 20px;">
+            <form method="get" action="{% url 'movie_cards' %}">
+                <input type="hidden" name="search" value="{{ query }}">
+                <button class="btn btn-success" name="tmdb_search" value="1" style="border: none;">
+                    Don't See it Here?
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <div class="container-fluid">
+            <div class="row d-flex justify-content-center g-3">
+                {% for movie in movies %}
+                    <div class="col-md-3 d-flex align-items-stretch">
+                        <div class="card" style="width: 20rem; margin: 10px; border-color: #16A085;">
+                            <a href="{% url 'movie_details' movie.tmdb_id %}">
+                                <img src="{{ movie.poster }}" class="card-img-top" style="width: 100%; height: auto; object-fit: cover;">
+                            </a>
+                            <div class="card-header" style="background-color: #000000; color: white; font-weight: bold; height: 50px; display: flex; align-items: center;">
+                                {{ movie.title }} ({{ movie.release_date|date:"Y" }})
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="pagination d-flex justify-content-between">
+                {% if movies.has_previous %}
+                    <span>
+                        <a href="?page={{ movies.previous_page_number }}{% for key, value in query_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-dark">Previous</a>
+                    </span>
+                {% else %}
+                    <span></span>
+                {% endif %}
+            
+                {% if movies.has_next %}
+                    <span>
+                        <a href="?page={{ movies.next_page_number }}{% for key, value in query_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-dark">Next</a>
+                    </span>
+                {% endif %}
+            </div>            
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #E0E0E0;">No results found.</p>
+    {% endif %}
+{% endif %}
+
+{% if tmdb_results %}
+    <h2 style="text-align: center; color: #E0E0E0; margin-top: 10px;">Additional Results</h2>
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center g-3">
+            {% for movie in tmdb_results %}
+                <div class="col-md-3 d-flex align-items-stretch">
+                    <div class="card" style="width: 20rem; margin: 10px; border-color: #16A085;">
+                        <a href="{% url 'movie_details' movie.id %}">
+                            <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="card-img-top" style="width: 100%; height:auto; object-fit: cover;">
+                        </a>
+                        <div class="card-header" style="background-color: #000000; color: #E0E0E0; font-weight: bold; height: 50px; display: flex; align-items: center;">
+                            {{ movie.title }} ({{ movie.release_date|slice:":4" }})
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

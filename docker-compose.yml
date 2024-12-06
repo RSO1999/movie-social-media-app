@@ -1,0 +1,43 @@
+services:
+
+  database:
+    image: postgres
+    container_name: postgres-container-finalproj
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Team5isTheBest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "8001:5432"
+
+  api_worker:
+    build:
+      context: ./chatgpt_api_worker
+      dockerfile: Dockerfile
+    container_name: chatgpt-flaskapi-container
+    healthcheck:
+      test: "curl -f http://localhost:8000/health"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "8080:8000"
+
+  crossover:
+    build:
+      context: ./final_project_team5
+      dockerfile: Dockerfile
+    container_name: crossover-container
+    depends_on:
+      database:
+        condition: service_healthy
+      api_worker:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+

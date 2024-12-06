@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %} Edit Profile {% endblock %}
+{% block content %}
+<h1>Edit Profile</h1>
+{% if request.user.is_authenticated %}
+{% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'error'%}
+      <div class="alert alert-danger" role="alert">
+        {{ message }}
+      </div>
+      {% endif %}
+      {% if message.tags == 'success'%}
+      <div class="alert alert-success" role="alert">
+        {{ message }}
+      </div>
+      {% endif %}
+    {% endfor %}
+{% endif %}
+<form method="post" action="{% url 'edit_profile' %}">{% csrf_token %}
+    <div class="mb-3">
+    <label for="email" class="form-label">Change Email</label>
+      {{form.email}}
+    </div>
+    <div class="mb-3">
+    <label for="username" class="form-label">Change Username</label>
+      {{form.username}}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Changes</button>
+    <button type="button" class="btn btn-secondary" onclick=window.location.href="{% url 'profile_view' user_id=user.id %}">Cancel</button>
+    <div>
+        <button type="button" class="btn btn-warning mt-3" onclick=window.location.href="{% url 'change_password' %}">Change Password</button>
+    </div>
+  </form>
+{% else %}
+    <p>You need to be logged in to edit your profile.</p>
+{% endif %}
+{% endblock %}

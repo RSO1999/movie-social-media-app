@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Select Favorite Movies{% endblock %}
+{% block content %}
+{% if request.user.is_authenticated %}
+<h2>Select Movies from {{ recipient.username }}'s Favorites</h2>
+<form id="movie-form" method="POST" action="{% url 'movie_picker' recipient.id %}">
+    {% csrf_token %}
+    <ul>
+        {% for movie in favorite_movies %}
+            <li>
+                <label>
+                    <input type="checkbox" name="selected_movies" value="{{ movie.title }}"> 
+                    {{ movie.title }}
+                </label>
+            </li>
+        {% endfor %}
+    </ul>
+    <button type="submit">Submit</button>
+</form>
+
+{% else %}
+    <p>You must be logged in to recommend someone a movie!</p>
+{% endif %}
+{% endblock %}

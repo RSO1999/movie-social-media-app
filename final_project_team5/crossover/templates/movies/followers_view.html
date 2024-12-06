@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center text-white">{{ user_profile.username }}'s Followers</h1>
+    <div class="follower-box border rounded p-3 mt-4">
+        <ul class="list-group">
+            {% for follower in followers %}
+                <li class="list-group-item bg-dark text-white text-center">
+                    <a href="{% url 'profile_view' follower.follower.id %}" class="text-white">{{ follower.follower.username }}</a>
+                </li>
+            {% empty %}
+                <li class="list-group-item bg-dark text-white text-center">No followers yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

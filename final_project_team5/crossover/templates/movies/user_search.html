@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>User Search Results</h2>
+<form method="get" action="{% url 'search_users' %}">
+    <input type="text" name="q" placeholder="Search for users..." value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
+{% if users %}
+    <ul>
+        {% for user in users %}
+            <li>
+                <a href="{% url 'profile_view' user.id %}">{{ user.username}}</a> ({{ user.email }})
+                <a href="{% url 'follow_user' user.id %}">Follow</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No users found.</p>
+{% endif %}
+
+{% endblock %}

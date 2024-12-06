@@ -1,15 +1,7 @@
-# final-project-team-5
+# Capstone Project Clone - Social Media App
+This repository is a clone of the Movie Social Media App that I created with my teammates during our Capstone class.
 
-Pull Postgres image first if you havent:
+# Security
+For security purposes, I have removed all API keys and sensitive information from the code before making this project public.
 
-then run:
-
-
-docker-compose up --build -d --remove-orphans 
-
-
-then when you want to stop it:
-
-run
-
-docker-compose-down -v
+  
